@@ -1,5 +1,6 @@
 package com.javarush.khmelov.lesson13.controller;
 
+import com.javarush.khmelov.lesson13.config.Winter;
 import com.javarush.khmelov.lesson13.entity.User;
 import com.javarush.khmelov.lesson13.service.UserService;
 import jakarta.servlet.ServletException;
@@ -14,7 +15,7 @@ import java.util.Collection;
 @WebServlet("/list-user")
 public class ListUserServlet extends HttpServlet {
 
-    private UserService userService=UserService.USER_SERVICE;
+    private final UserService userService= Winter.find(UserService.class);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

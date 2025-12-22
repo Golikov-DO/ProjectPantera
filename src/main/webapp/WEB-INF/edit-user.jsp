@@ -1,19 +1,11 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
-<head>
-    <title>Edit ${requestScope.user.login}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-
-</head>
+<%@include file="header.jsp" %>
 <body>
 <div class="container">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
-            crossorigin="anonymous"></script>
 
-    <form class="form-horizontal">
+
+    <form class="form-horizontal" method=POST>
         <fieldset>
 
             <!-- Form Name -->
@@ -29,6 +21,8 @@
                     <span class="help-block">help</span>
                 </div>
             </div>
+
+            <input type="hidden" id="id" value="${requestScope.user.id}"/>
 
             <!-- Password input-->
             <div class="form-group">
@@ -46,9 +40,9 @@
                 <label class="col-md-4 control-label" for="role">Role</label>
                 <div class="col-md-4">
                     <select id="role" name="role" class="form-control">
-                        <option value="ADMIN">ADMIN</option>
-                        <option value="USER">USER</option>
-                        <option value="GUEST">GUEST</option>
+                        <c:forEach var="role" items="${applicationScope.roles}">
+                            <option value="${role}" ${role==requestScope.user.role?"selected":""}>${role}</option>
+                        </c:forEach>
                     </select>
                 </div>
             </div>
@@ -57,8 +51,12 @@
             <div class="form-group">
                 <label class="col-md-4 control-label" for="create">Action</label>
                 <div class="col-md-8">
-                    <button id="create" name="create" class="btn btn-success">Create</button>
-                    <button id="update" name="update" class="btn btn-info">Update</button>
+                    <c:if test="${requestScope.user==null}">
+                        <button id="create" value="createButton" name="create" class="btn btn-success">Create</button>
+                    </c:if>
+                    <c:if test="${requestScope.user!=null}">
+                        <button id="update" value="updateButton" name="update" class="btn btn-info">Update</button>
+                    </c:if>
                 </div>
             </div>
 
@@ -66,4 +64,5 @@
     </form>
 </div>
 </body>
-</html>
+<%@include file="footer.jsp" %>
+
