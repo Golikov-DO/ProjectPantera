@@ -1,4 +1,4 @@
-package com.javarush.khmelov.lesson13.entity;
+package com.javarush.khmelov.app.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

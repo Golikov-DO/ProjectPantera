@@ -1,9 +1,9 @@
-package com.javarush.khmelov.lesson13.controller;
+package com.javarush.khmelov.app.cmd;
 
-import com.javarush.khmelov.lesson13.config.Winter;
-import com.javarush.khmelov.lesson13.entity.Role;
-import com.javarush.khmelov.lesson13.entity.User;
-import com.javarush.khmelov.lesson13.service.UserService;
+import com.javarush.khmelov.app.config.Winter;
+import com.javarush.khmelov.app.entity.Role;
+import com.javarush.khmelov.app.entity.User;
+import com.javarush.khmelov.app.service.UserService;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
@@ -14,30 +14,28 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebServlet(value = "/edit-user", loadOnStartup = 1)
-public class EditUser extends HttpServlet {
+public class EditUser implements Command {
 
-    private final UserService userService = Winter.find(UserService.class);
+    private final UserService userService;
 
-    @Override
-    public void init(ServletConfig config) throws ServletException {
-        ServletContext appScope = config.getServletContext();
-        appScope.setAttribute("roles", Role.values());
+    public EditUser(UserService userService) {
+        this.userService = userService;
     }
 
+
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public String doGet(HttpServletRequest req) {
         String strId = req.getParameter("id");
         if (strId != null && !strId.isEmpty()) {
             long id = Long.parseLong(strId);
             User user = userService.get(id).orElseThrow();
             req.setAttribute("user", user);
         }
-        req.getRequestDispatcher("WEB-INF/edit-user.jsp").forward(req, resp);
+        return getView();
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public String doPost(HttpServletRequest req)  {
         String strId = req.getParameter("id");
         Long id = strId == null || strId.isEmpty()
                 ? null
@@ -53,8 +51,8 @@ public class EditUser extends HttpServlet {
         } else if (req.getParameter("update") != null) {
             userService.update(user);
         } else {
-            throw new ServletException("incorrect form data");
+            throw new RuntimeException("incorrect form data");
         }
-        resp.sendRedirect("edit-user?id=" + user.getId());
+        return getView()+"?id=" + user.getId();
     }
 }
