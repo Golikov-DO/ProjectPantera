@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-@WebServlet(urlPatterns = {"/", "/list-user", "/edit-user"}, loadOnStartup = 1)
+@WebServlet(urlPatterns = {"", "/list-user", "/edit-user"}, loadOnStartup = 1)
 public class FrontController extends HttpServlet {
 
     private final HttpResolver httpResolver = Winter.find(HttpResolver.class);
