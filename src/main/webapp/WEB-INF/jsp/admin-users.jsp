@@ -7,73 +7,7 @@
     <!--suppress HtmlDeprecatedTag -->
     <title>Управление пользователями</title>
 
-    <script>
-        function resetAllRows() {
-            document.querySelectorAll("[id^='edit-']").forEach(e =>
-                e.classList.add("hidden")
-            );
-            document.querySelectorAll("[id^='view-']").forEach(e =>
-                e.classList.remove("hidden")
-            );
-            document.querySelectorAll(".saveBtn").forEach(b =>
-                b.classList.add("hidden")
-            );
-        }
-
-        function disableAddButton(disable) {
-            document.getElementById("addBtn").disabled = disable;
-        }
-
-        function enableRowEdit(login) {
-            if (!document.getElementById("addForm").classList.contains("hidden")) return;
-
-            resetAllRows();
-
-            document.getElementById("view-" + login).classList.add("hidden");
-            document.getElementById("edit-" + login).classList.remove("hidden");
-
-            disableAddButton(true);
-        }
-
-        function cancelRowEdit(login) {
-            const row = document.getElementById("edit-" + login);
-
-            // сброс значений
-            row.querySelectorAll("input, select").forEach(el => {
-                if (el.dataset.original !== undefined) {
-                    el.value = el.dataset.original;
-                }
-            });
-
-            row.querySelector(".saveBtn").classList.add("hidden");
-
-            document.getElementById("edit-" + login).classList.add("hidden");
-            document.getElementById("view-" + login).classList.remove("hidden");
-
-            disableAddButton(false);
-        }
-
-        function onUserFieldChange(login) {
-            document
-                .querySelector("#edit-" + login + " .saveBtn")
-                .classList.remove("hidden");
-        }
-
-        function showAddForm() {
-            resetAllRows();
-            document.querySelectorAll(".editBtn").forEach(b => b.disabled = true);
-
-            document.getElementById("addBtn").classList.add("hidden");
-            document.getElementById("addForm").classList.remove("hidden");
-        }
-
-        function cancelAddForm() {
-            document.querySelectorAll(".editBtn").forEach(b => b.disabled = false);
-
-            document.getElementById("addForm").classList.add("hidden");
-            document.getElementById("addBtn").classList.remove("hidden");
-        }
-    </script>
+    <script src="${pageContext.request.contextPath}/js/admin.js"></script>
 </head>
 <body>
 
@@ -91,20 +25,19 @@
             <td>${u.login()}</td>
             <td>${u.role()}</td>
             <td>
+                <div class="admin-actions">
 
-                <!-- ===== ПРОСМОТР ===== -->
-                <div id="view-${u.login()}">
-                    <button class="editBtn"
-                            type="button"
-                            onclick="enableRowEdit('${u.login()}')">
-                        Изменить
-                    </button>
-                </div>
+                    <!-- ===== ПРОСМОТР ===== -->
+                    <div id="view-${u.login()}">
+                        <button class="editBtn"
+                                type="button"
+                                onclick="enableRowEdit('${u.login()}')">
+                            Изменить
+                        </button>
+                    </div>
 
-                <!-- ===== РЕДАКТИРОВАНИЕ ===== -->
-                <div id="edit-${u.login()}" class="hidden">
-
-                    <div class="admin-actions">
+                    <!-- ===== РЕДАКТИРОВАНИЕ ===== -->
+                    <div id="edit-${u.login()}" class="hidden">
 
                         <form action="admin-user-save" method="post" class="inline-form">
                             <input type="hidden" name="login" value="${u.login()}">
@@ -133,9 +66,11 @@
                         </form>
 
                         <c:if test="${u.role() != 'ADMIN'}">
-                            <form action="admin-user-delete" method="get" class="inline-form">
+                            <form action="admin-user-delete"
+                                  method="get"
+                                  class="inline-form">
                                 <input type="hidden" name="login" value="${u.login()}">
-                                <button type="submit" style="color:red">
+                                <button type="submit" class="danger">
                                     Удалить
                                 </button>
                             </form>
@@ -148,7 +83,6 @@
 
                     </div>
                 </div>
-
             </td>
         </tr>
     </c:forEach>

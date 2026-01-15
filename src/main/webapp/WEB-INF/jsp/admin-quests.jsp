@@ -7,54 +7,7 @@
     <!--suppress HtmlDeprecatedTag -->
     <title>Управление квестами</title>
 
-    <script>
-        function resetAllRows() {
-            document.querySelectorAll("[id^='edit-']").forEach(e =>
-                e.classList.add("hidden")
-            );
-            document.querySelectorAll("[id^='view-']").forEach(e =>
-                e.classList.remove("hidden")
-            );
-        }
-
-        function disableAddButton(disable) {
-            document.getElementById("addBtn").disabled = disable;
-        }
-
-        function enableRowEdit(id) {
-            if (!document.getElementById("addForm").classList.contains("hidden")) return;
-
-            resetAllRows();
-
-            document.getElementById("view-" + id).classList.add("hidden");
-            document.getElementById("edit-" + id).classList.remove("hidden");
-
-            disableAddButton(true);
-        }
-
-        function cancelRowEdit(id) {
-            document.getElementById("edit-" + id).classList.add("hidden");
-            document.getElementById("view-" + id).classList.remove("hidden");
-
-            disableAddButton(false);
-        }
-
-        function showAddForm() {
-            resetAllRows();
-
-            document.querySelectorAll(".editBtn").forEach(b => b.disabled = true);
-
-            document.getElementById("addBtn").classList.add("hidden");
-            document.getElementById("addForm").classList.remove("hidden");
-        }
-
-        function cancelAddForm() {
-            document.querySelectorAll(".editBtn").forEach(b => b.disabled = false);
-
-            document.getElementById("addForm").classList.add("hidden");
-            document.getElementById("addBtn").classList.remove("hidden");
-        }
-    </script>
+    <script src="${pageContext.request.contextPath}/js/admin.js"></script>
 </head>
 <body>
 
@@ -72,44 +25,46 @@
             <td>${q.id}</td>
             <td>${q.title}</td>
             <td>
+                <div class="admin-actions">
 
-                <!-- ===== ПРОСМОТР ===== -->
-                <div id="view-${q.id}">
-                    <button class="editBtn"
-                            type="button"
-                            onclick="enableRowEdit('${q.id}')">
-                        Изменить
-                    </button>
+                    <!-- ===== ПРОСМОТР ===== -->
+                    <div id="view-${q.id}">
+                        <button class="editBtn"
+                                type="button"
+                                onclick="enableRowEdit('${q.id}')">
+                            Изменить
+                        </button>
+                    </div>
+
+                    <!-- ===== РЕДАКТИРОВАНИЕ ===== -->
+                    <div id="edit-${q.id}" class="hidden">
+
+                        <form action="admin-quest-save"
+                              method="post"
+                              enctype="multipart/form-data"
+                              class="inline-form">
+
+                            <input type="hidden" name="id" value="${q.id}">
+                            <input type="hidden" name="title" value="${q.title}">
+                            <input type="file" name="file" required>
+                            <button type="submit">Заменить файл</button>
+                        </form>
+
+                        <form action="admin-quest-delete"
+                              method="get"
+                              class="inline-form">
+
+                            <input type="hidden" name="id" value="${q.id}">
+                            <button type="submit" class="danger">Удалить</button>
+                        </form>
+
+                        <button type="button"
+                                onclick="cancelRowEdit('${q.id}')">
+                            Отмена
+                        </button>
+
+                    </div>
                 </div>
-
-                <!-- ===== РЕДАКТИРОВАНИЕ ===== -->
-                <div id="edit-${q.id}" class="hidden">
-
-                    <form action="admin-quest-save"
-                          method="post"
-                          enctype="multipart/form-data"
-                          class="inline">
-
-                        <input type="hidden" name="id" value="${q.id}">
-                        <input type="hidden" name="title" value="${q.title}">
-                        <input type="file" name="file" required>
-                        <button type="submit">Заменить файл</button>
-                    </form>
-
-                    <form action="admin-quest-delete"
-                          method="get"
-                          class="inline">
-
-                        <input type="hidden" name="id" value="${q.id}">
-                        <button type="submit" style="color:red">Удалить</button>
-                    </form>
-
-                    <button type="button"
-                            onclick="cancelRowEdit('${q.id}')">
-                        Отмена
-                    </button>
-                </div>
-
             </td>
         </tr>
     </c:forEach>

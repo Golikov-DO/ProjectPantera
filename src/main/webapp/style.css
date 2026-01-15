@@ -132,7 +132,7 @@ body {
 /* ===== ВСПОМОГАТЕЛЬНЫЕ КЛАССЫ (ДЛЯ JSP, БЕЗ inline-style) ===== */
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 .inline {
@@ -168,8 +168,22 @@ body {
     align-items: center;
 }
 
+.admin-actions form {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.admin-actions button {
+    white-space: nowrap;
+}
+
 .inline-form {
     margin: 0;
+}
+
+button.danger {
+    color: red;
 }
 
 /* ===== РЕЗУЛЬТАТ КВЕСТА ===== */
