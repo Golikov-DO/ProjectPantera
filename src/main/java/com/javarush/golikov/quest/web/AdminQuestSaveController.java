@@ -1,10 +1,10 @@
 package com.javarush.golikov.quest.web;
 
 import com.javarush.golikov.quest.service.AdminService;
+import com.javarush.golikov.quest.web.admin.AbstractAdminController;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
@@ -14,16 +14,14 @@ import java.io.InputStream;
 
 @WebServlet("/admin-quest-save")
 @MultipartConfig
-public class AdminQuestSaveController extends HttpServlet {
-    private AdminService adminService;
-
-    @Override
-    public void init() {
-        adminService = (AdminService) getServletContext().getAttribute("adminService");
-    }
+public class AdminQuestSaveController extends AbstractAdminController {
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
+
+        if (checkAdmin(req, resp)) {
+            return;
+        }
 
         Part file = req.getPart("file");
         String id = req.getParameter("id");

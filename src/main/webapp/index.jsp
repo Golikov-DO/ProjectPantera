@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
 <!DOCTYPE html>
 <html>
@@ -17,71 +16,56 @@
     <div class="menu">
 
         <!-- ===== ИНФОРМАЦИЯ О ПОЛЬЗОВАТЕЛЕ ===== -->
-        <p>
-            <b>
-                <c:choose>
-                    <c:when test="${empty sessionScope.user}">
-                        Пользователь:
-                    </c:when>
-                    <c:when test="${sessionScope.user.role == 'ADMIN'}">
-                        Администратор
-                    </c:when>
-                    <c:otherwise>
-                        Пользователь:
-                    </c:otherwise>
-                </c:choose>
-            </b>
 
-            <c:choose>
-                <c:when test="${empty sessionScope.user}">
-                    Гость
-                </c:when>
-                <c:when test="${sessionScope.user.role == 'ADMIN'}">
-                    <!-- ничего не выводим -->
-                </c:when>
-                <c:otherwise>
+        <c:if test="${empty sessionScope.user}">
+            <p><b>Пользователь:</b> Гость</p>
+        </c:if>
+
+        <c:if test="${not empty sessionScope.user}">
+            <p>
+                <b>Пользователь:</b>
                     ${sessionScope.user.login}
-                </c:otherwise>
-            </c:choose>
-        </p>
+            </p>
+        </c:if>
+
+        <c:if test="${not empty sessionScope.user and sessionScope.user.admin}">
+            <p><b>Администратор</b></p>
+        </c:if>
 
         <hr>
 
         <h3>Меню</h3>
 
-        <a href="index.jsp">Главная</a>
-        <a href="quests">Выбрать квест</a>
+        <a href="${pageContext.request.contextPath}/">Главная</a>
+        <a href="${pageContext.request.contextPath}/quests">Выбрать квест</a>
 
-        <c:if test="${sessionScope.user.role == 'ADMIN'}">
-            <a href="admin">Админка</a>
+        <c:if test="${not empty sessionScope.user and sessionScope.user.admin}">
+            <a href="${pageContext.request.contextPath}/admin">Админка</a>
         </c:if>
 
         <hr>
 
-        <c:choose>
-            <c:when test="${empty sessionScope.user}">
-                <a href="login">Войти</a>
-            </c:when>
-            <c:otherwise>
-                <a href="logout">Выйти</a>
-            </c:otherwise>
-        </c:choose>
+        <c:if test="${empty sessionScope.user}">
+            <a href="${pageContext.request.contextPath}/login">Войти</a>
+        </c:if>
+
+        <c:if test="${not empty sessionScope.user}">
+            <a href="${pageContext.request.contextPath}/logout">Выйти</a>
+        </c:if>
 
     </div>
 
     <!-- ================= ЦЕНТРАЛЬНАЯ ОБЛАСТЬ ================= -->
     <div class="content">
 
-        <c:choose>
-            <c:when test="${not empty requestScope.view}">
-                <jsp:include page="${requestScope.view}"/>
-            </c:when>
+        <c:if test="${not empty requestScope.view}">
+            <jsp:include page="${requestScope.view}"/>
+        </c:if>
 
-            <c:otherwise>
-                <h2>Добро пожаловать в текстовые квесты</h2>
-                <a href="quests">Выбрать квест</a>
-            </c:otherwise>
-        </c:choose>
+        <c:if test="${empty requestScope.view}">
+            <h2>Добро пожаловать в текстовые квесты</h2>
+            <a href="${pageContext.request.contextPath}/quests">Выбрать квест</a>
+        </c:if>
 
     </div>
 

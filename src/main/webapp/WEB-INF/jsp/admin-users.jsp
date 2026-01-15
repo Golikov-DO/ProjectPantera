@@ -15,6 +15,9 @@
             document.querySelectorAll("[id^='view-']").forEach(e =>
                 e.classList.remove("hidden")
             );
+            document.querySelectorAll(".saveBtn").forEach(b =>
+                b.classList.add("hidden")
+            );
         }
 
         function disableAddButton(disable) {
@@ -33,15 +36,31 @@
         }
 
         function cancelRowEdit(login) {
+            const row = document.getElementById("edit-" + login);
+
+            // сброс значений
+            row.querySelectorAll("input, select").forEach(el => {
+                if (el.dataset.original !== undefined) {
+                    el.value = el.dataset.original;
+                }
+            });
+
+            row.querySelector(".saveBtn").classList.add("hidden");
+
             document.getElementById("edit-" + login).classList.add("hidden");
             document.getElementById("view-" + login).classList.remove("hidden");
 
             disableAddButton(false);
         }
 
+        function onUserFieldChange(login) {
+            document
+                .querySelector("#edit-" + login + " .saveBtn")
+                .classList.remove("hidden");
+        }
+
         function showAddForm() {
             resetAllRows();
-
             document.querySelectorAll(".editBtn").forEach(b => b.disabled = true);
 
             document.getElementById("addBtn").classList.add("hidden");
@@ -83,44 +102,51 @@
                 </div>
 
                 <!-- ===== РЕДАКТИРОВАНИЕ ===== -->
-                <div id="edit-${u.login()}" style="display:none">
+                <div id="edit-${u.login()}" class="hidden">
 
-                    <form action="admin-user-save" method="post" class="inline-form">
-                        <input type="hidden" name="login" value="${u.login()}">
+                    <div class="admin-actions">
 
-                        <label>
-                            Пароль:
-                            <input name="password" placeholder="новый пароль">
-                        </label>
+                        <form action="admin-user-save" method="post" class="inline-form">
+                            <input type="hidden" name="login" value="${u.login()}">
 
-                        <label>
-                            Роль:
-                            <select name="role">
-                                <option value="USER" ${u.role() == 'USER' ? 'selected' : ''}>USER</option>
-                                <option value="ADMIN" ${u.role() == 'ADMIN' ? 'selected' : ''}>ADMIN</option>
-                            </select>
-                        </label>
+                            <label>
+                                Пароль:
+                                <input name="password"
+                                       data-original=""
+                                       oninput="onUserFieldChange('${u.login()}')">
+                            </label>
 
-                        <button type="submit">Сохранить</button>
-                    </form>
+                            <label>
+                                Роль:
+                                <select name="role"
+                                        data-original="${u.role()}"
+                                        onchange="onUserFieldChange('${u.login()}')">
+                                    <option value="USER" ${u.role() == 'USER' ? 'selected' : ''}>USER</option>
+                                    <option value="ADMIN" ${u.role() == 'ADMIN' ? 'selected' : ''}>ADMIN</option>
+                                </select>
+                            </label>
 
-                    <c:choose>
-                        <c:when test="${u.role() != 'ADMIN'}">
+                            <button type="submit"
+                                    class="saveBtn hidden">
+                                Сохранить
+                            </button>
+                        </form>
+
+                        <c:if test="${u.role() != 'ADMIN'}">
                             <form action="admin-user-delete" method="get" class="inline-form">
                                 <input type="hidden" name="login" value="${u.login()}">
-                                <button type="submit" style="color:red">Удалить</button>
+                                <button type="submit" style="color:red">
+                                    Удалить
+                                </button>
                             </form>
-                        </c:when>
-                        <c:otherwise>
-                            <i>нельзя удалить</i>
-                        </c:otherwise>
-                    </c:choose>
+                        </c:if>
 
-                    <button type="button"
-                            onclick="cancelRowEdit('${u.login()}')">
-                        Отмена
-                    </button>
+                        <button type="button"
+                                onclick="cancelRowEdit('${u.login()}')">
+                            Отмена
+                        </button>
 
+                    </div>
                 </div>
 
             </td>
@@ -135,7 +161,7 @@
     Добавить нового пользователя
 </button>
 
-<div id="addForm" style="display:none; margin-top:15px">
+<div id="addForm" class="hidden" style="margin-top:15px">
 
     <h3>Новый пользователь</h3>
 

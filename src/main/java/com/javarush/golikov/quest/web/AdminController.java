@@ -1,23 +1,19 @@
 package com.javarush.golikov.quest.web;
 
+import com.javarush.golikov.quest.web.admin.AbstractAdminController;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import java.io.*;
 
-import com.javarush.golikov.quest.model.User;
-import com.javarush.golikov.quest.auth.Role;
-
 @WebServlet("/admin")
-public class AdminController extends HttpServlet {
+public class AdminController extends AbstractAdminController {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
 
-        User user = (User) req.getSession().getAttribute("user");
-        if (user == null || user.role() != Role.ADMIN) {
-            resp.sendRedirect(req.getContextPath() + "/");
+        if (checkAdmin(req, resp)) {
             return;
         }
 

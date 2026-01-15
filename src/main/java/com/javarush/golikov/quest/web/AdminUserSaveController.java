@@ -2,25 +2,22 @@ package com.javarush.golikov.quest.web;
 
 import com.javarush.golikov.quest.auth.Role;
 import com.javarush.golikov.quest.model.User;
-import com.javarush.golikov.quest.service.AdminService;
+import com.javarush.golikov.quest.web.admin.AbstractAdminController;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
 @WebServlet("/admin-user-save")
-public class AdminUserSaveController extends HttpServlet {
-    private AdminService adminService;
-
-    @Override
-    public void init() {
-        adminService = (AdminService) getServletContext().getAttribute("adminService");
-    }
+public class AdminUserSaveController extends AbstractAdminController {
 
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
+
+        if (checkAdmin(req, resp)) {
+            return;
+        }
 
         String login = req.getParameter("login");
         String pass = req.getParameter("password");

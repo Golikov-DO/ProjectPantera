@@ -162,6 +162,16 @@ body {
     font-weight: bold;
 }
 
+.admin-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.inline-form {
+    margin: 0;
+}
+
 /* ===== РЕЗУЛЬТАТ КВЕСТА ===== */
 
 .result-box {
