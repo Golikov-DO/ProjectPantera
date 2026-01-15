@@ -1,0 +1,39 @@
+package com.javarush.golikov.quest.web;
+
+import com.javarush.golikov.quest.service.AdminService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+@WebServlet("/admin-quest-save")
+@MultipartConfig
+public class AdminQuestSaveController extends HttpServlet {
+    private AdminService adminService;
+
+    @Override
+    public void init() {
+        adminService = (AdminService) getServletContext().getAttribute("adminService");
+    }
+
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException, ServletException {
+
+        Part file = req.getPart("file");
+        String id = req.getParameter("id");
+        String title = req.getParameter("title");
+
+        try (InputStream is = file.getInputStream()) {
+            adminService.loadQuestFromTxt(id, title, is);
+        }
+
+        resp.sendRedirect(req.getContextPath() + "/admin-quests");
+    }
+}
+
