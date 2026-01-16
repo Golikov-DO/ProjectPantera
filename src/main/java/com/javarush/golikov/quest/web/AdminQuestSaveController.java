@@ -1,6 +1,5 @@
 package com.javarush.golikov.quest.web;
 
-import com.javarush.golikov.quest.service.AdminService;
 import com.javarush.golikov.quest.web.admin.AbstractAdminController;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;

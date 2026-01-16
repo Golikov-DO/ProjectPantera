@@ -61,14 +61,6 @@ function cancelRowEdit(id) {
     disableAddButton(false);
 }
 
-// ===== Отслеживание изменений =====
-
-function onFieldChange(id) {
-    byId("edit-" + id)
-        ?.querySelector(".saveBtn")
-        ?.classList.remove("hidden");
-}
-
 // ===== Добавление =====
 
 function showAddForm() {

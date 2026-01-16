@@ -36,12 +36,12 @@ public class QuestSession {
         return history;
     }
 
-    //добавить шаг в историю
+    // добавить шаг в историю
     public void addStep(String questionText, String answerText, boolean positive) {
         history.add(new Step(questionText, answerText, positive));
     }
 
-    //завершение
+    // завершение
     public void win() {
         finished = true;
         win = true;

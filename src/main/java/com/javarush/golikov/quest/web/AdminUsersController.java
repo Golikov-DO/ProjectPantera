@@ -2,7 +2,7 @@ package com.javarush.golikov.quest.web;
 
 import com.javarush.golikov.quest.web.admin.AbstractAdminController;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 

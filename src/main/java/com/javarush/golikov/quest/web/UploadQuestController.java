@@ -1,36 +1,29 @@
 package com.javarush.golikov.quest.web;
 
-import com.javarush.golikov.quest.auth.Role;
-import com.javarush.golikov.quest.model.User;
-import com.javarush.golikov.quest.service.AdminService;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.*;
-import java.io.*;
+import com.javarush.golikov.quest.web.admin.AbstractAdminController;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Logger;
 
 @WebServlet("/upload")
 @MultipartConfig
-public class UploadQuestController extends HttpServlet {
+public class UploadQuestController extends AbstractAdminController {
 
     private static final Logger log =
             Logger.getLogger(UploadQuestController.class.getName());
-
-    private AdminService adminService;
-
-    @Override
-    public void init() {
-        adminService = (AdminService) getServletContext().getAttribute("adminService");
-    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
 
-        // ===== ПРОВЕРКА АДМИНА =====
-        User user = (User) req.getSession().getAttribute("user");
-        if (user == null || user.role() != Role.ADMIN) {
-            resp.sendRedirect(req.getContextPath() + "/");
+        if (checkAdmin(req, resp)) {
             return;
         }
 
@@ -42,7 +35,6 @@ public class UploadQuestController extends HttpServlet {
 
             adminService.loadQuestFromTxt(id, title, is);
 
-            // redirect НА КОНТРОЛЛЕР АДМИН-КВЕСТОВ
             resp.sendRedirect(req.getContextPath() + "/admin-quests");
 
         } catch (Exception e) {

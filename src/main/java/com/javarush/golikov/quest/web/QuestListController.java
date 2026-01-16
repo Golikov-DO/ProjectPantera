@@ -21,7 +21,6 @@ public class QuestListController extends HttpServlet {
 
         req.setAttribute("quests", questService.getAllQuests());
 
-        // говорим index.jsp, что нужно показать список квестов
         req.setAttribute("view", "/WEB-INF/jsp/quests.jsp");
 
         req.getRequestDispatcher("/index.jsp").forward(req, resp);

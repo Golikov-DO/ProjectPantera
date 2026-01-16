@@ -10,8 +10,6 @@ import java.util.Collection;
 
 public class AdminService {
 
-    /* ===== USERS ===== */
-
     public Collection<User> getAllUsers() {
         return UserRepository.all();
     }
@@ -23,8 +21,6 @@ public class AdminService {
     public void deleteUser(String login) {
         UserRepository.delete(login);
     }
-
-    /* ===== QUESTS ===== */
 
     public Collection<Quest> getAllQuests() {
         return QuestRepository.all();
@@ -42,7 +38,4 @@ public class AdminService {
         QuestRepository.remove(id);
     }
 
-    public User findUser(String login) {
-        return UserRepository.find(login);
-    }
 }

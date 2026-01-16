@@ -21,9 +21,6 @@ public class LoginController extends HttpServlet {
         authService = (AuthService) getServletContext().getAttribute("authService");
     }
 
-    /**
-     * GET — показать форму логина
-     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -32,9 +29,6 @@ public class LoginController extends HttpServlet {
         req.getRequestDispatcher("/index.jsp").forward(req, resp);
     }
 
-    /**
-     * POST — обработка логина
-     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -47,7 +41,6 @@ public class LoginController extends HttpServlet {
         if (user != null) {
             req.getSession().setAttribute("user", user);
 
-            // redirect на контроллер, а не JSP
             resp.sendRedirect(req.getContextPath() + "/");
         } else {
             req.setAttribute("error", true);

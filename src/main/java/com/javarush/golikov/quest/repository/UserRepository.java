@@ -15,22 +15,18 @@ public class UserRepository {
         users.put("admin", new User("admin", "admin", Role.ADMIN));
     }
 
-    // 🔹 НАЙТИ пользователя (НУЖНО для логина)
     public static User find(String login) {
         return users.get(login);
     }
 
-    // 🔹 ВСЕ пользователи (для админки)
     public static Collection<User> all() {
         return users.values();
     }
 
-    // 🔹 СОХРАНИТЬ / ОБНОВИТЬ
     public static void save(User u) {
         users.put(u.login(), u);
     }
 
-    // 🔹 УДАЛИТЬ
     public static void delete(String login) {
         users.remove(login);
     }

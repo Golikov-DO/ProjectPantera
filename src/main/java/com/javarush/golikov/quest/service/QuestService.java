@@ -40,9 +40,9 @@ public class QuestService {
                 .orElseThrow();
 
         session.addStep(
-                node.text(),          // ❓ текст вопроса
-                answer,               // ➜ текст ответа
-                choice.positive()     // ✔ / ✖
+                node.text(),
+                answer,
+                choice.positive()
         );
 
         session.setCurrentNode(next);
