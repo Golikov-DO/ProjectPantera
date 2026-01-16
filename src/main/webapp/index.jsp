@@ -38,6 +38,7 @@
 
         <a href="${pageContext.request.contextPath}/">Главная</a>
         <a href="${pageContext.request.contextPath}/quests">Выбрать квест</a>
+        <a href="statistics">Статистика</a>
 
         <c:if test="${not empty sessionScope.user and sessionScope.user.admin}">
             <a href="${pageContext.request.contextPath}/admin">Админка</a>
