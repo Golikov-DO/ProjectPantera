@@ -1,37 +1,45 @@
 package com.javarush.golikov.quest.loader;
 
-import com.javarush.golikov.quest.model.Choice;
-import com.javarush.golikov.quest.model.Quest;
-import com.javarush.golikov.quest.model.QuestNode;
+import com.javarush.golikov.quest.model.*;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 
 public class TxtQuestLoader {
 
-    public static Quest load(InputStream in, String questId, String title) throws Exception {
+    public static Quest load(InputStream in, String questId) throws Exception {
 
-        BufferedReader br = new BufferedReader(
-                new InputStreamReader(in)
-        );
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
+        String title = null;
+        String startNodeId = null;
 
         Map<String, QuestNode> nodes = new LinkedHashMap<>();
 
-        String line;
         String currentId = null;
         String currentText = null;
         List<Choice> choices = new ArrayList<>();
 
+        String line;
         while ((line = br.readLine()) != null) {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            // ===== ОБЪЯВЛЕНИЕ УЗЛА =====
+            // ===== TITLE =====
+            if (line.startsWith("!")) {
+                title = line.substring(1).trim();
+                continue;
+            }
+
+            // ===== START NODE =====
+            if (line.startsWith("*")) {
+                startNodeId = line.substring(1).trim();
+                continue;
+            }
+
+            // ===== NODE ID =====
             if (line.startsWith("? ") && !line.substring(2).contains(" ")) {
 
-                // сохраняем предыдущий узел
                 if (currentId != null) {
                     nodes.put(currentId,
                             new QuestNode(currentId, currentText, choices));
@@ -40,54 +48,53 @@ public class TxtQuestLoader {
                 currentId = line.substring(2).trim();
                 currentText = null;
                 choices = new ArrayList<>();
+                continue;
             }
 
-            // ===== ТЕКСТ УЗЛА =====
-            else if (line.startsWith("?")) {
-
+            // ===== NODE TEXT =====
+            if (line.startsWith("?")) {
                 if (currentId == null) {
-                    throw new RuntimeException(
-                            "Node text without node id: " + line);
+                    throw new RuntimeException("Text before node id: " + line);
                 }
-
                 currentText = line.substring(1).trim();
+                continue;
             }
 
-            // ===== ВАРИАНТЫ =====
-            else if (line.startsWith("+") || line.startsWith("-")) {
-
+            // ===== CHOICES =====
+            if (line.startsWith("+") || line.startsWith("-")) {
                 if (currentId == null) {
-                    throw new RuntimeException(
-                            "Choice without node id: " + line);
+                    throw new RuntimeException("Choice before node id: " + line);
                 }
 
-                String body = line.substring(1).trim();
-                String[] parts = body.split("->");
-
+                String[] parts = line.substring(1).trim().split("->");
                 if (parts.length != 2) {
-                    throw new RuntimeException(
-                            "Invalid choice format: " + line);
+                    throw new RuntimeException("Invalid choice: " + line);
                 }
 
-                String text = parts[0].trim();
-                String next = parts[1].trim();
-                boolean positive = line.startsWith("+");
-
-                choices.add(new Choice(text, next, positive));
+                choices.add(new Choice(
+                        parts[0].trim(),
+                        parts[1].trim(),
+                        line.startsWith("+")
+                ));
             }
         }
 
-        // сохраняем последний узел
+        // последний узел
         if (currentId != null) {
             nodes.put(currentId,
                     new QuestNode(currentId, currentText, choices));
         }
 
-        // проверка обязательного старта
-        if (!nodes.containsKey("start")) {
-            throw new RuntimeException("Quest has no 'start' node");
+        if (title == null) {
+            throw new RuntimeException("Quest has no title (!)");
+        }
+        if (startNodeId == null) {
+            throw new RuntimeException("Quest has no start node (*)");
+        }
+        if (!nodes.containsKey(startNodeId)) {
+            throw new RuntimeException("Start node not found: " + startNodeId);
         }
 
-        return new Quest(questId, title, "start", nodes);
+        return new Quest(questId, title, startNodeId, nodes);
     }
 }

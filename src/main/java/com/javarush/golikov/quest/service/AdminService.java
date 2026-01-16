@@ -26,9 +26,9 @@ public class AdminService {
         return QuestRepository.all();
     }
 
-    public void loadQuestFromTxt(String id, String title, InputStream is) {
+    public void loadQuestFromTxt(String id, InputStream is) {
         try {
-            QuestRepository.loadTxt(is, id, title);
+            QuestRepository.loadTxt(is, id);
         } catch (Exception e) {
             throw new IllegalStateException("Ошибка загрузки квеста: " + id, e);
         }

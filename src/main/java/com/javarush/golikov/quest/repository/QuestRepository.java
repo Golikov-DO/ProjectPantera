@@ -31,8 +31,8 @@ public class QuestRepository {
         quests.clear();
     }
 
-    public static void loadTxt(InputStream in, String id, String title) throws Exception {
-        Quest quest = TxtQuestLoader.load(in, id, title);
+    public static void loadTxt(InputStream in, String id) throws Exception {
+        Quest quest = TxtQuestLoader.load(in, id);
         quests.put(id, quest);
     }
 
@@ -52,14 +52,13 @@ public class QuestRepository {
 
                 String fileName = path.substring(path.lastIndexOf("/") + 1);
                 String questId = fileName.replace(".txt", "");
-                String title = questId.substring(0, 1).toUpperCase() + questId.substring(1);
 
                 try (InputStream in = ctx.getResourceAsStream(path)) {
                     if (in == null) {
                         log.warning("Не удалось загрузить файл: " + path);
                         continue;
                     }
-                    loadTxt(in, questId, title);
+                    loadTxt(in, questId);
                 }
             }
 

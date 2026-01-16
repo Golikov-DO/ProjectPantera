@@ -29,11 +29,10 @@ public class UploadQuestController extends AbstractAdminController {
 
         Part file = req.getPart("file");
         String id = req.getParameter("id");
-        String title = req.getParameter("title");
 
         try (InputStream is = file.getInputStream()) {
 
-            adminService.loadQuestFromTxt(id, title, is);
+            adminService.loadQuestFromTxt(id, is);
 
             resp.sendRedirect(req.getContextPath() + "/admin-quests");
 

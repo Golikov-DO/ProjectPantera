@@ -17,4 +17,8 @@ public class StatisticsRepository {
     public static List<QuestResult> all() {
         return Collections.unmodifiableList(results);
     }
+
+    public static void clear() {
+        results.clear();
+    }
 }

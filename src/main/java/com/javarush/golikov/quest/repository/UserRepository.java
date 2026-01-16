@@ -30,5 +30,9 @@ public class UserRepository {
     public static void delete(String login) {
         users.remove(login);
     }
+
+    public static void clear() {
+        users.clear();
+    }
 }
 
