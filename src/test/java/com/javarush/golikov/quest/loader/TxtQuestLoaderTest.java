@@ -1,5 +1,6 @@
 package com.javarush.golikov.quest.loader;
 
+import com.javarush.golikov.quest.model.Choice;
 import com.javarush.golikov.quest.model.Quest;
 import com.javarush.golikov.quest.model.QuestNode;
 import org.junit.jupiter.api.DisplayName;
@@ -11,20 +12,24 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TxtQuestLoaderTest {
+
     @Test
-    @DisplayName("Test load valid quest returns Quest with start node")
+    @DisplayName("Test load valid quest returns Quest with title and start node")
     void testLoadValidQuestReturnsQuestWithStartNode() throws Exception {
 
         String data = """
-            ? start
+            !Farm Quest
+            *start
+
+            @start
             ? You are on a farm
             + Open barn -> win
             - Run away -> lose
 
-            ? win
+            @win
             ? You win!
 
-            ? lose
+            @lose
             ? You lose!
             """;
 
@@ -37,18 +42,42 @@ class TxtQuestLoaderTest {
         assertEquals("farm", quest.getId());
         assertEquals("Farm Quest", quest.getTitle());
 
-        QuestNode start = quest.getStart();
+        QuestNode start = quest.getNode("start");
         assertNotNull(start);
         assertEquals(2, start.choices().size());
     }
 
     @Test
-    @DisplayName("Test load quest without start node throws RuntimeException")
+    @DisplayName("Test quest without title throws RuntimeException")
+    void testLoadQuestWithoutTitleThrowsException() {
+
+        String data = """
+            *start
+
+            @start
+            ? Question
+            """;
+
+        RuntimeException ex = assertThrows(
+                RuntimeException.class,
+                () -> TxtQuestLoader.load(
+                        new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)),
+                        "bad"
+                )
+        );
+
+        assertEquals("Quest has no title (!)", ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("Test quest without start node throws RuntimeException")
     void testLoadQuestWithoutStartNodeThrowsException() {
 
         String data = """
-            ? intro
-            ? No start here
+            !No Start Quest
+
+            @intro
+            ? Just text
             """;
 
         RuntimeException ex = assertThrows(
@@ -59,15 +88,19 @@ class TxtQuestLoaderTest {
                 )
         );
 
-        assertEquals("Quest has no 'start' node", ex.getMessage());
+        assertEquals("Quest has no start node (*)", ex.getMessage());
     }
 
     @Test
-    @DisplayName("Test node text without node id throws RuntimeException")
-    void testNodeTextWithoutNodeIdThrowsException() {
+    @DisplayName("Test node without text throws RuntimeException")
+    void testNodeWithoutTextThrowsException() {
 
         String data = """
-            ? Just text without id
+            !Bad Quest
+            *start
+
+            @start
+            + Go -> win
             """;
 
         RuntimeException ex = assertThrows(
@@ -78,26 +111,7 @@ class TxtQuestLoaderTest {
                 )
         );
 
-        assertTrue(ex.getMessage().startsWith("Node text without node id"));
-    }
-
-    @Test
-    @DisplayName("Test choice without node id throws RuntimeException")
-    void testChoiceWithoutNodeIdThrowsException() {
-
-        String data = """
-            + Choice without node -> next
-            """;
-
-        RuntimeException ex = assertThrows(
-                RuntimeException.class,
-                () -> TxtQuestLoader.load(
-                        new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)),
-                        "bad"
-                )
-        );
-
-        assertTrue(ex.getMessage().startsWith("Choice without node id"));
+        assertTrue(ex.getMessage().startsWith("Node has no text"));
     }
 
     @Test
@@ -105,7 +119,10 @@ class TxtQuestLoaderTest {
     void testInvalidChoiceFormatThrowsException() {
 
         String data = """
-            ? start
+            !Bad Choice Quest
+            *start
+
+            @start
             ? Question
             + Invalid format
             """;
@@ -118,36 +135,165 @@ class TxtQuestLoaderTest {
                 )
         );
 
-        assertTrue(ex.getMessage().startsWith("Invalid choice format"));
+        assertTrue(ex.getMessage().startsWith("Invalid choice"));
     }
 
-//    @Test
-//    @DisplayName("Test positive and negative choices parsed correctly")
-//    void testPositiveAndNegativeChoicesParsedCorrectly() throws Exception {
-//
-//        String data = """
-//            ? start
-//            ? Question
-//            + Yes -> win
-//            - No -> lose
-//
-//            ? win
-//            ? You win
-//
-//            ? lose
-//            ? You lose
-//            """;
-//
-//        Quest quest = TxtQuestLoader.load(
-//                new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)),
-//                "test",
-//                "Test Quest"
-//        );
-//
-//        QuestNode start = quest.getStart();
-//
-//        assertEquals(2, start.choices().size());
-//        assertTrue(start.choices().get(0).positive());
-//        assertFalse(start.choices().get(1).positive());
-//    }
+    @Test
+    @DisplayName("Test positive and negative choices parsed correctly")
+    void testPositiveAndNegativeChoicesParsedCorrectly() throws Exception {
+
+        String data = """
+            !Test Quest
+            *start
+
+            @start
+            ? Question
+            + Yes -> win
+            - No -> lose
+
+            @win
+            ? You win
+
+            @lose
+            ? You lose
+            """;
+
+        Quest quest = TxtQuestLoader.load(
+                new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)),
+                "test"
+        );
+
+        QuestNode start = quest.getNode("start");
+
+        assertNotNull(start);
+        assertEquals(2, start.choices().size());
+
+        Choice first = start.choices().get(0);
+        Choice second = start.choices().get(1);
+
+        assertTrue(first.positive(), "First choice must be positive (+)");
+        assertFalse(second.positive(), "Second choice must be negative (-)");
+    }
+
+    @Test
+    void testLoadEmptyFileThrowsException() {
+        String data = "";
+
+        assertThrows(Exception.class, () ->
+                TxtQuestLoader.load(
+                        new ByteArrayInputStream(data.getBytes()),
+                        "id"
+                )
+        );
+    }
+
+    @Test
+    void testLoadWithoutStartThrowsException() {
+        String data = """
+        !Quest
+        @node
+        ? Question
+        """;
+
+        assertThrows(Exception.class, () ->
+                TxtQuestLoader.load(
+                        new ByteArrayInputStream(data.getBytes()),
+                        "id"
+                )
+        );
+    }
+
+    @Test
+    void testLoadWithUnknownLineTypeThrowsException() {
+        String data = """
+        !Quest
+        *start
+
+        @start
+        % invalid
+        """;
+
+        assertThrows(Exception.class, () ->
+                TxtQuestLoader.load(
+                        new ByteArrayInputStream(data.getBytes()),
+                        "id"
+                )
+        );
+    }
+
+    @Test
+    void testLoadIgnoresBlankLines() throws Exception {
+        String data = """
+
+        !Quest
+
+        *start
+
+
+        @start
+
+        ? Question
+
+        """;
+
+        Quest quest = TxtQuestLoader.load(
+                new ByteArrayInputStream(data.getBytes()),
+                "id"
+        );
+
+        assertNotNull(quest);
+    }
+    @Test
+    void testLoadWithoutTitleThrowsException() {
+        String data = """
+        *start
+
+        @start
+        ? Question
+        """;
+
+        assertThrows(Exception.class, () ->
+                TxtQuestLoader.load(
+                        new ByteArrayInputStream(data.getBytes()),
+                        "id"
+                )
+        );
+    }
+    @Test
+    void testLoadWithInvalidTransitionThrowsException() {
+        String data = """
+        !Quest
+        *start
+
+        @start
+        ? Question
+        + Go -> nowhere
+        """;
+
+        assertThrows(Exception.class, () ->
+                TxtQuestLoader.load(
+                        new ByteArrayInputStream(data.getBytes()),
+                        "id"
+                )
+        );
+    }
+
+    @Test
+    void testLoadWithUnknownLinePrefixThrowsException() {
+        String data = """
+        !Quest
+        *start
+
+        @start
+        $ invalid
+        """;
+
+        assertThrows(Exception.class, () ->
+                TxtQuestLoader.load(
+                        new ByteArrayInputStream(data.getBytes()),
+                        "id"
+                )
+        );
+    }
+
 }

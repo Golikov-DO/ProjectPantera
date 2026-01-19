@@ -66,4 +66,30 @@ class StatisticsServiceTest {
 
         assertTrue(stats.isEmpty());
     }
+
+    @Test
+    @DisplayName("Test getStats sorts by login")
+    void testGetStatsSortsByLogin() {
+
+        statisticsService.saveResult("B", "farm", true);
+        statisticsService.saveResult("A", "farm", true);
+
+        var stats = statisticsService.getStats();
+
+        assertEquals("A", stats.get(0).getLogin());
+        assertEquals("B", stats.get(1).getLogin());
+    }
+    @Test
+    @DisplayName("Test getStats sorts by questId when login is same")
+    void testGetStatsSortsByQuestIdWhenLoginSame() {
+
+        statisticsService.saveResult("Гость", "bQuest", true);
+        statisticsService.saveResult("Гость", "aQuest", true);
+
+        var stats = statisticsService.getStats();
+
+        assertEquals("aQuest", stats.get(0).getQuestId());
+        assertEquals("bQuest", stats.get(1).getQuestId());
+    }
+
 }

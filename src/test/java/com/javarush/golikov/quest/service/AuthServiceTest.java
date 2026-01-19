@@ -67,8 +67,71 @@ class AuthServiceTest {
 
         HttpSession session = mock(HttpSession.class);
 
-        authService.logout(session);
+        AuthService service = new AuthService();
+        service.logout(session);
 
         verify(session).invalidate();
+    }
+
+    @Test
+    void testLoginUserNotFound() {
+
+        try (MockedStatic<UserRepository> repo = mockStatic(UserRepository.class)) {
+            repo.when(() -> UserRepository.find("u"))
+                    .thenReturn(null);
+
+            AuthService service = new AuthService();
+            User result = service.login("u", "p");
+
+            assertNull(result);
+        }
+    }
+
+    @Test
+    void testLoginWrongPassword() {
+
+        User user = new User("u", "correct", null);
+
+        try (MockedStatic<UserRepository> repo = mockStatic(UserRepository.class)) {
+            repo.when(() -> UserRepository.find("u"))
+                    .thenReturn(user);
+
+            AuthService service = new AuthService();
+            User result = service.login("u", "wrong");
+
+            assertNull(result);
+        }
+    }
+
+    @Test
+    void testLoginReturnsNullWhenUserExistsButPasswordNullSafe() {
+
+        User user = new User("u", "pass", null);
+
+        try (MockedStatic<UserRepository> repo = mockStatic(UserRepository.class)) {
+            repo.when(() -> UserRepository.find("u"))
+                    .thenReturn(user);
+
+            AuthService service = new AuthService();
+            User result = service.login("u", "pass2");
+
+            // важно: именно return null ПОСЛЕ if
+            assertNull(result);
+        }
+    }
+
+    @Test
+    @DisplayName("Integration test login without static mocking")
+    void testLoginWithoutMockStatic() {
+
+        // реальный пользователь в репозитории
+        UserRepository.clear();
+        UserRepository.save(new User("real", "123", null));
+
+        AuthService service = new AuthService();
+
+        User result = service.login("real", "123");
+
+        assertNotNull(result);
     }
 }

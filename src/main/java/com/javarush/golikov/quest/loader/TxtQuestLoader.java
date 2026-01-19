@@ -38,14 +38,19 @@ public class TxtQuestLoader {
             }
 
             // ===== NODE ID =====
-            if (line.startsWith("? ") && !line.substring(2).contains(" ")) {
+            if (line.startsWith("@")) {
 
                 if (currentId != null) {
+                    if (currentText == null) {
+                        throw new RuntimeException(
+                                "Node '" + currentId + "' has no text (? ...)"
+                        );
+                    }
                     nodes.put(currentId,
                             new QuestNode(currentId, currentText, choices));
                 }
 
-                currentId = line.substring(2).trim();
+                currentId = line.substring(1).trim();
                 currentText = null;
                 choices = new ArrayList<>();
                 continue;
@@ -54,7 +59,9 @@ public class TxtQuestLoader {
             // ===== NODE TEXT =====
             if (line.startsWith("?")) {
                 if (currentId == null) {
-                    throw new RuntimeException("Text before node id: " + line);
+                    throw new RuntimeException(
+                            "Text before node id: " + line
+                    );
                 }
                 currentText = line.substring(1).trim();
                 continue;
@@ -63,12 +70,16 @@ public class TxtQuestLoader {
             // ===== CHOICES =====
             if (line.startsWith("+") || line.startsWith("-")) {
                 if (currentId == null) {
-                    throw new RuntimeException("Choice before node id: " + line);
+                    throw new RuntimeException(
+                            "Choice before node id: " + line
+                    );
                 }
 
                 String[] parts = line.substring(1).trim().split("->");
                 if (parts.length != 2) {
-                    throw new RuntimeException("Invalid choice: " + line);
+                    throw new RuntimeException(
+                            "Invalid choice format: " + line
+                    );
                 }
 
                 choices.add(new Choice(
@@ -79,20 +90,28 @@ public class TxtQuestLoader {
             }
         }
 
-        // последний узел
+        // ===== последний узел =====
         if (currentId != null) {
+            if (currentText == null) {
+                throw new RuntimeException(
+                        "Node '" + currentId + "' has no text (? ...)"
+                );
+            }
             nodes.put(currentId,
                     new QuestNode(currentId, currentText, choices));
         }
 
+        // ===== ВАЛИДАЦИЯ =====
         if (title == null) {
-            throw new RuntimeException("Quest has no title (!)");
+            throw new RuntimeException("Quest has no title (!...)");
         }
         if (startNodeId == null) {
-            throw new RuntimeException("Quest has no start node (*)");
+            throw new RuntimeException("Quest has no start node (*...)");
         }
         if (!nodes.containsKey(startNodeId)) {
-            throw new RuntimeException("Start node not found: " + startNodeId);
+            throw new RuntimeException(
+                    "Start node not found: " + startNodeId
+            );
         }
 
         return new Quest(questId, title, startNodeId, nodes);

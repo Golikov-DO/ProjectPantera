@@ -27,12 +27,11 @@ class QuestRepositoryTest {
     void testLoadTxtStoresQuestAndGetReturnsIt() throws Exception {
 
         String data = """
-            ? start
-            ? Question
-            + Yes -> win
+            !Test Quest
+            *start
 
-            ? win
-            ? Win
+            @start
+            ? Question
             """;
 
         QuestRepository.loadTxt(
@@ -47,72 +46,79 @@ class QuestRepositoryTest {
         assertEquals("Test Quest", quest.getTitle());
     }
 
-//    @Test
-//    @DisplayName("Test all returns all loaded quests")
-//    void testAllReturnsAllLoadedQuests() throws Exception {
-//
-//        QuestRepository.loadTxt(
-//                new ByteArrayInputStream("""
-//                    ? start
-//                    ? Q
-//                    """.getBytes()),
-//                "q1",
-//                "Quest 1"
-//        );
-//
-//        QuestRepository.loadTxt(
-//                new ByteArrayInputStream("""
-//                    ? start
-//                    ? Q
-//                    """.getBytes()),
-//                "q2",
-//                "Quest 2"
-//        );
-//
-//        assertEquals(2, QuestRepository.all().size());
-//    }
-//
-//    @Test
-//    @DisplayName("Test remove deletes quest by id")
-//    void testRemoveDeletesQuestById() throws Exception {
-//
-//        QuestRepository.loadTxt(
-//                new ByteArrayInputStream("""
-//                    ? start
-//                    ? Q
-//                    """.getBytes()),
-//                "q1",
-//                "Quest 1"
-//        );
-//
-//        QuestRepository.remove("q1");
-//
-//        assertNull(QuestRepository.get("q1"));
-//        assertTrue(QuestRepository.all().isEmpty());
-//    }
-//
-//    @Test
-//    @DisplayName("Test clear removes all quests")
-//    void testClearRemovesAllQuests() throws Exception {
-//
-//        QuestRepository.loadTxt(
-//                new ByteArrayInputStream("""
-//                    ? start
-//                    ? Q
-//                    """.getBytes()),
-//                "q1",
-//                "Quest 1"
-//        );
-//
-//        QuestRepository.clear();
-//
-//        assertTrue(QuestRepository.all().isEmpty());
-//    }
+    @Test
+    @DisplayName("Test all returns all loaded quests")
+    void testAllReturnsAllLoadedQuests() throws Exception {
+
+        String data = """
+            !Quest
+            *start
+
+            @start
+            ? Q
+            """;
+
+        QuestRepository.loadTxt(
+                new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)),
+                "q1"
+        );
+
+        QuestRepository.loadTxt(
+                new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)),
+                "q2"
+        );
+
+        assertEquals(2, QuestRepository.all().size());
+    }
+
+    @Test
+    @DisplayName("Test remove deletes quest by id")
+    void testRemoveDeletesQuestById() throws Exception {
+
+        String data = """
+            !Quest
+            *start
+
+            @start
+            ? Q
+            """;
+
+        QuestRepository.loadTxt(
+                new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)),
+                "q1"
+        );
+
+        QuestRepository.remove("q1");
+
+        assertNull(QuestRepository.get("q1"));
+        assertTrue(QuestRepository.all().isEmpty());
+    }
+
+    @Test
+    @DisplayName("Test clear removes all quests")
+    void testClearRemovesAllQuests() throws Exception {
+
+        String data = """
+            !Quest
+            *start
+
+            @start
+            ? Q
+            """;
+
+        QuestRepository.loadTxt(
+                new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)),
+                "q1"
+        );
+
+        QuestRepository.clear();
+
+        assertTrue(QuestRepository.all().isEmpty());
+    }
 
     @Test
     @DisplayName("Test get returns null for unknown quest id")
     void testGetReturnsNullForUnknownId() {
-
         assertNull(QuestRepository.get("unknown"));
     }
 
@@ -129,15 +135,49 @@ class QuestRepositoryTest {
                 ));
 
         when(ctx.getResourceAsStream(anyString()))
-                .thenAnswer(invocation ->
-                        new ByteArrayInputStream("""
-                        ? start
-                        ? Question
-                        """.getBytes(StandardCharsets.UTF_8))
-                );
+                .thenReturn(new ByteArrayInputStream("""
+                    !Quest
+                    *start
+
+                    @start
+                    ? Question
+                    """.getBytes(StandardCharsets.UTF_8)));
 
         QuestRepository.loadAll(ctx);
 
         assertEquals(2, QuestRepository.all().size());
+    }
+
+    @Test
+    void testLoadAllDoesNothingWhenNoResources() {
+        ServletContext ctx = mock(ServletContext.class);
+        when(ctx.getResourcePaths("/WEB-INF/classes/quests/"))
+                .thenReturn(null);
+
+        QuestRepository.loadAll(ctx);
+
+        assertTrue(QuestRepository.all().isEmpty());
+    }
+
+    @Test
+    void testRemoveUnknownIdDoesNothing() {
+        QuestRepository.remove("unknown");
+        assertTrue(QuestRepository.all().isEmpty());
+    }
+
+    @Test
+    void testLoadAllSkipsWhenResourceStreamIsNull() {
+
+        ServletContext ctx = mock(ServletContext.class);
+
+        when(ctx.getResourcePaths("/WEB-INF/classes/quests/"))
+                .thenReturn(Set.of("/WEB-INF/classes/quests/test.txt"));
+
+        when(ctx.getResourceAsStream(anyString()))
+                .thenReturn(null);
+
+        QuestRepository.loadAll(ctx);
+
+        assertTrue(QuestRepository.all().isEmpty());
     }
 }

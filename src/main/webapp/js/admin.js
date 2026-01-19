@@ -79,11 +79,25 @@ function cancelAddForm() {
     byId("addBtn")?.classList.remove("hidden");
 }
 
-function onUserFieldChange(login) {
-    const editBlock = document.getElementById("edit-" + login);
+function onUserFieldChange(id) {
+    const editBlock = document.getElementById("edit-" + id);
+    if (!editBlock) return;
 
     const saveBtn = editBlock.querySelector(".saveBtn");
-    if (saveBtn) {
+    if (!saveBtn) return;
+
+    const passwordInput = editBlock.querySelector("input[name='password']");
+
+    // 👇 если это НЕ пользователь (квесты, другое)
+    if (!passwordInput) {
+        saveBtn.classList.remove("hidden");
+        return;
+    }
+
+    // 👇 если это пользователь — проверяем пароль
+    if (passwordInput.value.trim().length === 0) {
+        saveBtn.classList.add("hidden");
+    } else {
         saveBtn.classList.remove("hidden");
     }
 }

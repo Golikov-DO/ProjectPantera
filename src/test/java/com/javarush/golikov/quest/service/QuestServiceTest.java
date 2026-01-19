@@ -57,4 +57,85 @@ class QuestServiceTest {
 
         assertFalse(questService.isFinalNode(node));
     }
+
+    @Test
+    @DisplayName("Test startQuest throws exception when quest not found")
+    void testStartQuestThrowsWhenQuestNotFound() {
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> questService.startQuest("unknown")
+        );
+    }
+
+    @Test
+    @DisplayName("Test isFinalNode returns true for final node")
+    void testIsFinalNodeReturnsTrueForFinalNode() {
+
+        QuestSession session = questService.startQuest("farm");
+
+        questService.applyChoice(session, "barn", "Да");
+
+        QuestNode node = questService.getCurrentNode(session);
+
+        assertTrue(questService.isFinalNode(node));
+    }
+
+    @Test
+    @DisplayName("Test isWinNode detects win node")
+    void testIsWinNodeDetectsWinNode() {
+
+        QuestSession session = questService.startQuest("farm");
+
+        questService.applyChoice(session, "barn", "Да");
+
+        QuestNode node = questService.getCurrentNode(session);
+
+        assertTrue(questService.isWinNode(node));
+    }
+
+    @Test
+    @DisplayName("Test getAllQuests returns all quests")
+    void testGetAllQuestsReturnsAllQuests() {
+
+        assertEquals(1, questService.getAllQuests().size());
+    }
+
+    @Test
+    @DisplayName("Test exitQuest marks session as lost")
+    void testExitQuestMarksSessionAsLost() {
+
+        QuestSession session = questService.startQuest("farm");
+
+        questService.exitQuest(session);
+
+        assertTrue(session.isFinished());
+        assertFalse(session.isWin());
+    }
+
+    @Test
+    @DisplayName("Test getQuestTitle returns quest title")
+    void testGetQuestTitleReturnsQuestTitle() {
+
+        QuestSession session = questService.startQuest("farm");
+
+        String title = questService.getQuestTitle(session);
+
+        assertNotNull(title);
+        assertFalse(title.isBlank());
+    }
+
+    @Test
+    @DisplayName("Test exitQuest marks unfinished quest as lost")
+    void testExitQuestFromUnfinishedQuestMarksLose() {
+
+        QuestSession session = questService.startQuest("farm");
+
+        assertFalse(session.isFinished());
+
+        questService.exitQuest(session);
+
+        assertTrue(session.isFinished());
+        assertFalse(session.isWin());
+    }
 }
