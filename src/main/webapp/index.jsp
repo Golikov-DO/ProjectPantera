@@ -11,9 +11,9 @@
 <body>
 
 <div class="layout">
-
+    <c:set var="questActive" value="${not empty sessionScope.quest}" />
     <!-- ================= ЛЕВОЕ МЕНЮ ================= -->
-    <div class="menu">
+    <div class="menu ${questActive ? 'menu-disabled' : ''}">
 
         <!-- ===== ИНФОРМАЦИЯ О ПОЛЬЗОВАТЕЛЕ ===== -->
 

@@ -32,6 +32,11 @@ body {
     text-decoration: underline;
 }
 
+.menu-disabled {
+    pointer-events: none; /* блокирует клики */
+    opacity: 0.5;         /* визуально видно, что меню неактивно */
+}
+
 /* ===== ЦЕНТР ===== */
 .content {
     flex: 1;

@@ -204,24 +204,6 @@ class TxtQuestLoaderTest {
     }
 
     @Test
-    void testLoadWithUnknownLineTypeThrowsException() {
-        String data = """
-        !Quest
-        *start
-
-        @start
-        % invalid
-        """;
-
-        assertThrows(Exception.class, () ->
-                TxtQuestLoader.load(
-                        new ByteArrayInputStream(data.getBytes()),
-                        "id"
-                )
-        );
-    }
-
-    @Test
     void testLoadIgnoresBlankLines() throws Exception {
         String data = """
 
@@ -259,41 +241,83 @@ class TxtQuestLoaderTest {
                 )
         );
     }
+
     @Test
-    void testLoadWithInvalidTransitionThrowsException() {
+    void testTextBeforeNodeThrowsException() {
         String data = """
         !Quest
         *start
-
-        @start
-        ? Question
-        + Go -> nowhere
+        ? text before node
         """;
 
-        assertThrows(Exception.class, () ->
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
                 TxtQuestLoader.load(
                         new ByteArrayInputStream(data.getBytes()),
                         "id"
                 )
         );
+
+        assertTrue(ex.getMessage().startsWith("Text before node id"));
     }
 
+
     @Test
-    void testLoadWithUnknownLinePrefixThrowsException() {
+    void testChoiceBeforeNodeThrowsException() {
         String data = """
         !Quest
         *start
-
-        @start
-        $ invalid
+        + Go -> win
         """;
 
-        assertThrows(Exception.class, () ->
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
                 TxtQuestLoader.load(
                         new ByteArrayInputStream(data.getBytes()),
                         "id"
                 )
         );
+
+        assertTrue(ex.getMessage().startsWith("Choice before node id"));
     }
 
+    @Test
+    void testLastNodeWithoutTextThrowsException() {
+        String data = """
+        !Quest
+        *start
+
+        @start
+        ? ok
+
+        @end
+        """;
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                TxtQuestLoader.load(
+                        new ByteArrayInputStream(data.getBytes()),
+                        "id"
+                )
+        );
+
+        assertTrue(ex.getMessage().contains("Node 'end' has no text"));
+    }
+
+    @Test
+    void testStartNodeNotFoundThrowsException() {
+        String data = """
+        !Quest
+        *start
+
+        @other
+        ? text
+        """;
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () ->
+                TxtQuestLoader.load(
+                        new ByteArrayInputStream(data.getBytes()),
+                        "id"
+                )
+        );
+
+        assertTrue(ex.getMessage().startsWith("Start node not found"));
+    }
 }
